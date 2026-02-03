@@ -69,8 +69,8 @@ export default function Layout({ children }) {
       {/* Sidebar */}
       <aside className="w-64 bg-slate-50 border-r border-slate-200 flex flex-col">
         <div className="p-6 border-b border-slate-200">
-          <h1 className="text-2xl font-bold text-slate-900" data-testid="app-title">LoanTrek</h1>
-          <p className="text-sm text-slate-600 mt-1">Sistema de Empréstimo</p>
+          <h1 className="text-2xl font-bold text-slate-900" data-testid="app-title">CANSF</h1>
+          <p className="text-sm text-slate-600 mt-1">Gestão de Empréstimos</p>
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
