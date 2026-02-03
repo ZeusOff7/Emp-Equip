@@ -137,7 +137,7 @@ export default function EquipmentList() {
               </Button>
             </div>
 
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={handleStatusChange}>
               <SelectTrigger className="w-full md:w-48" data-testid="status-filter">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Filtrar por status" />
