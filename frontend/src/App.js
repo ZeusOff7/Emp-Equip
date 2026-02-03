@@ -7,6 +7,7 @@ import EquipmentDetail from '@/pages/EquipmentDetail';
 import AddEquipment from '@/pages/AddEquipment';
 import TransactionHistory from '@/pages/TransactionHistory';
 import Reports from '@/pages/Reports';
+import Settings from '@/pages/Settings';
 import '@/App.css';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
           <Route path="/equipment/:id" element={<EquipmentDetail />} />
           <Route path="/transactions" element={<TransactionHistory />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </Layout>
       <Toaster position="top-right" />
