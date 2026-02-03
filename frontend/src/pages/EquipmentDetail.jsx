@@ -26,6 +26,13 @@ import { toast } from 'sonner';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+const STATUS_MAP = {
+  'Available': 'Disponível',
+  'On Loan': 'Em Empréstimo',
+  'Maintenance': 'Manutenção',
+  'Retired': 'Desativado'
+};
+
 export default function EquipmentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -78,7 +85,7 @@ export default function EquipmentDetail() {
         status: equipRes.data.status,
       });
     } catch (error) {
-      toast.error('Failed to load equipment details');
+      toast.error('Falha ao carregar detalhes do equipamento');
       console.error(error);
     } finally {
       setLoading(false);
@@ -89,7 +96,7 @@ export default function EquipmentDetail() {
     e.preventDefault();
     
     if (!checkoutForm.borrower_name || !checkoutForm.borrower_email) {
-      toast.error('Please fill in all required fields');
+      toast.error('Por favor, preencha todos os campos obrigatórios');
       return;
     }
 
@@ -100,7 +107,7 @@ export default function EquipmentDetail() {
         ...checkoutForm,
       });
 
-      toast.success('Equipment checked out successfully');
+      toast.success('Equipamento emprestado com sucesso');
       setShowCheckoutDialog(false);
       setCheckoutForm({
         borrower_name: '',
@@ -111,14 +118,14 @@ export default function EquipmentDetail() {
       });
       fetchData();
     } catch (error) {
-      toast.error('Failed to check out equipment');
+      toast.error('Falha ao emprestar equipamento');
       console.error(error);
     }
   };
 
   const handleCheckin = async () => {
     if (!equipment.current_borrower) {
-      toast.error('No active loan for this equipment');
+      toast.error('Nenhum empréstimo ativo para este equipamento');
       return;
     }
 
@@ -130,10 +137,10 @@ export default function EquipmentDetail() {
         borrower_email: equipment.current_borrower_email || 'N/A',
       });
 
-      toast.success('Equipment checked in successfully');
+      toast.success('Equipamento devolvido com sucesso');
       fetchData();
     } catch (error) {
-      toast.error('Failed to check in equipment');
+      toast.error('Falha ao devolver equipamento');
       console.error(error);
     }
   };
@@ -143,26 +150,26 @@ export default function EquipmentDetail() {
     
     try {
       await axios.put(`${API}/equipment/${id}`, editForm);
-      toast.success('Equipment updated successfully');
+      toast.success('Equipamento atualizado com sucesso');
       setShowEditDialog(false);
       fetchData();
     } catch (error) {
-      toast.error('Failed to update equipment');
+      toast.error('Falha ao atualizar equipamento');
       console.error(error);
     }
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this equipment?')) {
+    if (!window.confirm('Tem certeza que deseja excluir este equipamento?')) {
       return;
     }
 
     try {
       await axios.delete(`${API}/equipment/${id}`);
-      toast.success('Equipment deleted successfully');
+      toast.success('Equipamento excluído com sucesso');
       navigate('/equipment');
     } catch (error) {
-      toast.error('Failed to delete equipment');
+      toast.error('Falha ao excluir equipamento');
       console.error(error);
     }
   };
@@ -172,7 +179,7 @@ export default function EquipmentDetail() {
     if (!file) return;
 
     if (!file.name.endsWith('.pdf')) {
-      toast.error('Only PDF files are allowed');
+      toast.error('Apenas arquivos PDF são permitidos');
       return;
     }
 
@@ -186,11 +193,11 @@ export default function EquipmentDetail() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      toast.success('Document uploaded successfully');
+      toast.success('Documento enviado com sucesso');
       fetchData();
       e.target.value = '';
     } catch (error) {
-      toast.error('Failed to upload document');
+      toast.error('Falha ao enviar documento');
       console.error(error);
     } finally {
       setUploadingFile(false);
@@ -212,22 +219,22 @@ export default function EquipmentDetail() {
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      toast.error('Failed to download document');
+      toast.error('Falha ao baixar documento');
       console.error(error);
     }
   };
 
   const handleDeleteDocument = async (docId) => {
-    if (!window.confirm('Are you sure you want to delete this document?')) {
+    if (!window.confirm('Tem certeza que deseja excluir este documento?')) {
       return;
     }
 
     try {
       await axios.delete(`${API}/documents/${docId}`);
-      toast.success('Document deleted successfully');
+      toast.success('Documento excluído com sucesso');
       fetchData();
     } catch (error) {
-      toast.error('Failed to delete document');
+      toast.error('Falha ao excluir documento');
       console.error(error);
     }
   };
@@ -235,7 +242,7 @@ export default function EquipmentDetail() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-slate-500">Loading equipment details...</div>
+        <div className="text-slate-500">Carregando detalhes do equipamento...</div>
       </div>
     );
   }
@@ -243,7 +250,7 @@ export default function EquipmentDetail() {
   if (!equipment) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-slate-500">Equipment not found</div>
+        <div className="text-slate-500">Equipamento não encontrado</div>
       </div>
     );
   }
@@ -258,7 +265,7 @@ export default function EquipmentDetail() {
 
     return (
       <span className={`px-3 py-1 rounded-full text-sm font-medium ${styles[status]}`}>
-        {status}
+        {STATUS_MAP[status] || status}
       </span>
     );
   };
@@ -272,7 +279,7 @@ export default function EquipmentDetail() {
           data-testid="back-btn"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Equipment
+          Voltar para Equipamentos
         </Link>
         <div className="flex items-start justify-between">
           <div>
@@ -284,16 +291,16 @@ export default function EquipmentDetail() {
               <DialogTrigger asChild>
                 <Button variant="outline" data-testid="edit-btn">
                   <Edit className="h-4 w-4 mr-2" />
-                  Edit
+                  Editar
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Edit Equipment</DialogTitle>
+                  <DialogTitle>Editar Equipamento</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleEdit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Equipment Name</Label>
+                    <Label>Nome do Equipamento</Label>
                     <Input
                       value={editForm.name}
                       onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
@@ -302,7 +309,7 @@ export default function EquipmentDetail() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Model</Label>
+                    <Label>Modelo</Label>
                     <Input
                       value={editForm.model}
                       onChange={(e) => setEditForm({ ...editForm, model: e.target.value })}
@@ -311,7 +318,7 @@ export default function EquipmentDetail() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Serial Number</Label>
+                    <Label>Número de Série</Label>
                     <Input
                       value={editForm.serial_number}
                       onChange={(e) => setEditForm({ ...editForm, serial_number: e.target.value })}
@@ -326,19 +333,19 @@ export default function EquipmentDetail() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Available">Available</SelectItem>
-                        <SelectItem value="On Loan">On Loan</SelectItem>
-                        <SelectItem value="Maintenance">Maintenance</SelectItem>
-                        <SelectItem value="Retired">Retired</SelectItem>
+                        <SelectItem value="Available">Disponível</SelectItem>
+                        <SelectItem value="On Loan">Em Empréstimo</SelectItem>
+                        <SelectItem value="Maintenance">Manutenção</SelectItem>
+                        <SelectItem value="Retired">Desativado</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="flex gap-2">
                     <Button type="submit" className="bg-slate-900 hover:bg-slate-800" data-testid="save-edit-btn">
-                      Save Changes
+                      Salvar Alterações
                     </Button>
                     <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
-                      Cancel
+                      Cancelar
                     </Button>
                   </div>
                 </form>
@@ -347,7 +354,7 @@ export default function EquipmentDetail() {
 
             <Button variant="destructive" onClick={handleDelete} data-testid="delete-btn">
               <Trash2 className="h-4 w-4 mr-2" />
-              Delete
+              Excluir
             </Button>
           </div>
         </div>
@@ -358,7 +365,7 @@ export default function EquipmentDetail() {
         <div className="lg:col-span-2 space-y-6">
           <Card className="border border-slate-200 rounded-xl">
             <CardHeader>
-              <CardTitle>Equipment Information</CardTitle>
+              <CardTitle>Informações do Equipamento</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -368,7 +375,7 @@ export default function EquipmentDetail() {
                 </div>
                 {equipment.serial_number && (
                   <div>
-                    <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Serial Number</p>
+                    <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Número de Série</p>
                     <p className="text-sm font-mono text-slate-900">{equipment.serial_number}</p>
                   </div>
                 )}
@@ -376,31 +383,31 @@ export default function EquipmentDetail() {
 
               {equipment.status === 'On Loan' && equipment.current_borrower && (
                 <div className="pt-4 border-t border-slate-200">
-                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Current Loan</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Empréstimo Atual</p>
                   <div className="space-y-2">
                     <div>
-                      <p className="text-sm text-slate-600">Borrower</p>
+                      <p className="text-sm text-slate-600">Responsável</p>
                       <p className="text-base font-medium text-slate-900">{equipment.current_borrower}</p>
                     </div>
                     {equipment.current_borrower_email && (
                       <div>
-                        <p className="text-sm text-slate-600">Email</p>
+                        <p className="text-sm text-slate-600">E-mail</p>
                         <p className="text-base text-slate-900">{equipment.current_borrower_email}</p>
                       </div>
                     )}
                     {equipment.delivery_date && (
                       <div>
-                        <p className="text-sm text-slate-600">Delivery Date</p>
+                        <p className="text-sm text-slate-600">Data de Entrega</p>
                         <p className="text-base text-slate-900">
-                          {new Date(equipment.delivery_date).toLocaleDateString()}
+                          {new Date(equipment.delivery_date).toLocaleDateString('pt-BR')}
                         </p>
                       </div>
                     )}
                     {equipment.expected_return_date && (
                       <div>
-                        <p className="text-sm text-slate-600">Expected Return</p>
+                        <p className="text-sm text-slate-600">Prazo de Devolução</p>
                         <p className="text-base text-slate-900">
-                          {new Date(equipment.expected_return_date).toLocaleDateString()}
+                          {new Date(equipment.expected_return_date).toLocaleDateString('pt-BR')}
                         </p>
                       </div>
                     )}
@@ -413,23 +420,23 @@ export default function EquipmentDetail() {
           {/* Actions */}
           <Card className="border border-slate-200 rounded-xl">
             <CardHeader>
-              <CardTitle>Actions</CardTitle>
+              <CardTitle>Ações</CardTitle>
             </CardHeader>
             <CardContent className="flex gap-3">
               {equipment.status === 'Available' || equipment.status === 'Maintenance' ? (
                 <Dialog open={showCheckoutDialog} onOpenChange={setShowCheckoutDialog}>
                   <DialogTrigger asChild>
                     <Button className="bg-slate-900 hover:bg-slate-800" data-testid="checkout-btn">
-                      Check Out Equipment
+                      Emprestar Equipamento
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-md">
                     <DialogHeader>
-                      <DialogTitle>Check Out Equipment</DialogTitle>
+                      <DialogTitle>Emprestar Equipamento</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleCheckout} className="space-y-4">
                       <div className="space-y-2">
-                        <Label>Borrower Name *</Label>
+                        <Label>Nome do Responsável *</Label>
                         <Input
                           value={checkoutForm.borrower_name}
                           onChange={(e) => setCheckoutForm({ ...checkoutForm, borrower_name: e.target.value })}
@@ -438,7 +445,7 @@ export default function EquipmentDetail() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Borrower Email *</Label>
+                        <Label>E-mail do Responsável *</Label>
                         <Input
                           type="email"
                           value={checkoutForm.borrower_email}
@@ -448,7 +455,7 @@ export default function EquipmentDetail() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Delivery Date</Label>
+                        <Label>Data de Entrega</Label>
                         <Input
                           type="date"
                           value={checkoutForm.delivery_date}
@@ -457,7 +464,7 @@ export default function EquipmentDetail() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Expected Return Date</Label>
+                        <Label>Prazo de Devolução</Label>
                         <Input
                           type="date"
                           value={checkoutForm.expected_return_date}
@@ -466,20 +473,20 @@ export default function EquipmentDetail() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Notes</Label>
+                        <Label>Observações</Label>
                         <Textarea
                           value={checkoutForm.notes}
                           onChange={(e) => setCheckoutForm({ ...checkoutForm, notes: e.target.value })}
-                          placeholder="Optional notes..."
+                          placeholder="Observações opcionais..."
                           data-testid="checkout-notes"
                         />
                       </div>
                       <div className="flex gap-2">
                         <Button type="submit" className="bg-slate-900 hover:bg-slate-800" data-testid="confirm-checkout-btn">
-                          Confirm Check Out
+                          Confirmar Empréstimo
                         </Button>
                         <Button type="button" variant="outline" onClick={() => setShowCheckoutDialog(false)}>
-                          Cancel
+                          Cancelar
                         </Button>
                       </div>
                     </form>
@@ -487,7 +494,7 @@ export default function EquipmentDetail() {
                 </Dialog>
               ) : equipment.status === 'On Loan' ? (
                 <Button onClick={handleCheckin} className="bg-emerald-600 hover:bg-emerald-700" data-testid="checkin-btn">
-                  Check In Equipment
+                  Devolver Equipamento
                 </Button>
               ) : null}
             </CardContent>
@@ -496,11 +503,11 @@ export default function EquipmentDetail() {
           {/* History */}
           <Card className="border border-slate-200 rounded-xl">
             <CardHeader>
-              <CardTitle>Movement History</CardTitle>
+              <CardTitle>Histórico de Movimentações</CardTitle>
             </CardHeader>
             <CardContent>
               {movements.length === 0 ? (
-                <p className="text-slate-500 text-sm">No movement history</p>
+                <p className="text-slate-500 text-sm">Nenhum histórico de movimentação</p>
               ) : (
                 <div className="space-y-3">
                   {movements.map((movement) => (
@@ -520,11 +527,11 @@ export default function EquipmentDetail() {
                       </div>
                       <div className="flex-1">
                         <p className="font-medium text-slate-900">
-                          {movement.movement_type === 'check_out' ? 'Checked Out' : 'Checked In'}
+                          {movement.movement_type === 'check_out' ? 'Emprestado' : 'Devolvido'}
                         </p>
-                        <p className="text-sm text-slate-600">Borrower: {movement.borrower_name}</p>
+                        <p className="text-sm text-slate-600">Responsável: {movement.borrower_name}</p>
                         <p className="text-xs text-slate-500 mt-1">
-                          {new Date(movement.timestamp).toLocaleString()}
+                          {new Date(movement.timestamp).toLocaleString('pt-BR')}
                         </p>
                         {movement.notes && (
                           <p className="text-sm text-slate-600 mt-2 italic">{movement.notes}</p>
@@ -543,7 +550,7 @@ export default function EquipmentDetail() {
           <Card className="border border-slate-200 rounded-xl">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                Documents
+                Documentos
                 <Label htmlFor="file-upload" className="cursor-pointer">
                   <div className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
                     <Upload className="h-4 w-4" />
@@ -561,9 +568,9 @@ export default function EquipmentDetail() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {uploadingFile && <p className="text-sm text-slate-500 mb-3">Uploading...</p>}
+              {uploadingFile && <p className="text-sm text-slate-500 mb-3">Enviando...</p>}
               {documents.length === 0 ? (
-                <p className="text-slate-500 text-sm">No documents uploaded</p>
+                <p className="text-slate-500 text-sm">Nenhum documento enviado</p>
               ) : (
                 <div className="space-y-2">
                   {documents.map((doc) => (
