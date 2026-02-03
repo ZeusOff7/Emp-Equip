@@ -73,7 +73,8 @@ export default function Dashboard() {
       icon: Package,
       color: 'text-slate-900',
       bgColor: 'bg-slate-100',
-      testId: 'stat-total'
+      testId: 'stat-total',
+      filterStatus: 'All'
     },
     {
       title: 'Disponíveis',
@@ -81,7 +82,8 @@ export default function Dashboard() {
       icon: CheckCircle,
       color: 'text-emerald-700',
       bgColor: 'bg-emerald-100',
-      testId: 'stat-available'
+      testId: 'stat-available',
+      filterStatus: 'Available'
     },
     {
       title: 'Em Empréstimo',
@@ -89,7 +91,8 @@ export default function Dashboard() {
       icon: AlertTriangle,
       color: 'text-amber-700',
       bgColor: 'bg-amber-100',
-      testId: 'stat-on-loan'
+      testId: 'stat-on-loan',
+      filterStatus: 'On Loan'
     },
     {
       title: 'Manutenção',
@@ -97,7 +100,8 @@ export default function Dashboard() {
       icon: Wrench,
       color: 'text-slate-700',
       bgColor: 'bg-slate-100',
-      testId: 'stat-maintenance'
+      testId: 'stat-maintenance',
+      filterStatus: 'Maintenance'
     },
   ];
 
