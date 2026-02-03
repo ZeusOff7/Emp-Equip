@@ -112,7 +112,12 @@ export default function EquipmentList() {
     <div className="p-8 md:p-12" data-testid="equipment-list-page">
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-slate-900 mb-2">Equipamentos</h1>
-        <p className="text-slate-600">Gerenciar todos os itens de equipamento</p>
+        <p className="text-slate-600">
+          {statusFilter !== 'All' 
+            ? `Filtrando por: ${STATUS_MAP[statusFilter] || statusFilter}`
+            : 'Gerenciar todos os itens de equipamento'
+          }
+        </p>
       </div>
 
       {/* Filters */}
