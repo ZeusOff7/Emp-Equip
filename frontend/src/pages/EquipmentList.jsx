@@ -17,6 +17,13 @@ import { toast } from 'sonner';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+const STATUS_MAP = {
+  'Available': 'Disponível',
+  'On Loan': 'Em Empréstimo',
+  'Maintenance': 'Manutenção',
+  'Retired': 'Desativado'
+};
+
 export default function EquipmentList() {
   const [equipment, setEquipment] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +43,7 @@ export default function EquipmentList() {
       const response = await axios.get(`${API}/equipment`, { params });
       setEquipment(response.data);
     } catch (error) {
-      toast.error('Failed to load equipment');
+      toast.error('Falha ao carregar equipamentos');
       console.error(error);
     } finally {
       setLoading(false);
@@ -57,7 +64,7 @@ export default function EquipmentList() {
       const response = await axios.get(`${API}/equipment`, { params });
       setEquipment(response.data);
     } catch (error) {
-      toast.error('Search failed');
+      toast.error('Falha na busca');
       console.error(error);
     } finally {
       setLoading(false);
@@ -74,7 +81,7 @@ export default function EquipmentList() {
 
     return (
       <span className={`px-3 py-1 rounded-full text-xs font-medium status-badge ${styles[status] || 'bg-slate-100 text-slate-800'}`}>
-        {status}
+        {STATUS_MAP[status] || status}
       </span>
     );
   };
@@ -84,8 +91,8 @@ export default function EquipmentList() {
   return (
     <div className="p-8 md:p-12" data-testid="equipment-list-page">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-slate-900 mb-2">Equipment</h1>
-        <p className="text-slate-600">Manage all equipment items</p>
+        <h1 className="text-4xl font-bold text-slate-900 mb-2">Equipamentos</h1>
+        <p className="text-slate-600">Gerenciar todos os itens de equipamento</p>
       </div>
 
       {/* Filters */}
@@ -94,7 +101,7 @@ export default function EquipmentList() {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 flex gap-2">
               <Input
-                placeholder="Search by name, model, or serial number..."
+                placeholder="Buscar por nome, modelo ou número de série..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -113,14 +120,14 @@ export default function EquipmentList() {
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full md:w-48" data-testid="status-filter">
                 <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filter by status" />
+                <SelectValue placeholder="Filtrar por status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="All">All Status</SelectItem>
-                <SelectItem value="Available">Available</SelectItem>
-                <SelectItem value="On Loan">On Loan</SelectItem>
-                <SelectItem value="Maintenance">Maintenance</SelectItem>
-                <SelectItem value="Retired">Retired</SelectItem>
+                <SelectItem value="All">Todos os Status</SelectItem>
+                <SelectItem value="Available">Disponível</SelectItem>
+                <SelectItem value="On Loan">Em Empréstimo</SelectItem>
+                <SelectItem value="Maintenance">Manutenção</SelectItem>
+                <SelectItem value="Retired">Desativado</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -130,12 +137,12 @@ export default function EquipmentList() {
       {/* Equipment Grid */}
       {loading ? (
         <div className="flex items-center justify-center h-64">
-          <div className="text-slate-500">Loading equipment...</div>
+          <div className="text-slate-500">Carregando equipamentos...</div>
         </div>
       ) : filteredEquipment.length === 0 ? (
         <Card className="border border-slate-200 rounded-xl">
           <CardContent className="p-12 text-center">
-            <p className="text-slate-500">No equipment found</p>
+            <p className="text-slate-500">Nenhum equipamento encontrado</p>
           </CardContent>
         </Card>
       ) : (
@@ -161,7 +168,7 @@ export default function EquipmentList() {
                   {item.serial_number && (
                     <div className="mb-3">
                       <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">
-                        Serial Number
+                        Número de Série
                       </p>
                       <p className="text-sm font-mono text-slate-900">{item.serial_number}</p>
                     </div>
@@ -170,14 +177,14 @@ export default function EquipmentList() {
                   {item.status === 'On Loan' && item.current_borrower && (
                     <div className="mt-4 pt-4 border-t border-slate-200">
                       <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">
-                        Current Borrower
+                        Responsável Atual
                       </p>
                       <p className="text-sm font-medium text-slate-900">
                         {item.current_borrower}
                       </p>
                       {item.expected_return_date && (
                         <p className="text-xs text-slate-600 mt-1">
-                          Due: {new Date(item.expected_return_date).toLocaleDateString()}
+                          Prazo: {new Date(item.expected_return_date).toLocaleDateString('pt-BR')}
                         </p>
                       )}
                     </div>

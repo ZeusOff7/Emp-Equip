@@ -33,17 +33,17 @@ export default function AddEquipment() {
     e.preventDefault();
     
     if (!formData.name || !formData.model) {
-      toast.error('Please fill in all required fields');
+      toast.error('Por favor, preencha todos os campos obrigatórios');
       return;
     }
 
     try {
       setLoading(true);
       await axios.post(`${API}/equipment`, formData);
-      toast.success('Equipment added successfully');
+      toast.success('Equipamento adicionado com sucesso');
       navigate('/equipment');
     } catch (error) {
-      toast.error('Failed to add equipment');
+      toast.error('Falha ao adicionar equipamento');
       console.error(error);
     } finally {
       setLoading(false);
@@ -63,28 +63,28 @@ export default function AddEquipment() {
           data-testid="back-btn"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Equipment
+          Voltar para Equipamentos
         </Link>
-        <h1 className="text-4xl font-bold text-slate-900 mb-2">Add New Equipment</h1>
-        <p className="text-slate-600">Register a new equipment item</p>
+        <h1 className="text-4xl font-bold text-slate-900 mb-2">Adicionar Novo Equipamento</h1>
+        <p className="text-slate-600">Cadastrar um novo item de equipamento</p>
       </div>
 
       <Card className="border border-slate-200 rounded-xl max-w-2xl">
         <CardHeader>
-          <CardTitle>Equipment Details</CardTitle>
+          <CardTitle>Detalhes do Equipamento</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm font-medium text-slate-700">
-                  Equipment Name *
+                  Nome do Equipamento *
                 </Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => handleChange('name', e.target.value)}
-                  placeholder="e.g., MacBook Pro 16"
+                  placeholder="ex: MacBook Pro 16"
                   required
                   data-testid="input-name"
                 />
@@ -92,13 +92,13 @@ export default function AddEquipment() {
 
               <div className="space-y-2">
                 <Label htmlFor="model" className="text-sm font-medium text-slate-700">
-                  Model *
+                  Modelo *
                 </Label>
                 <Input
                   id="model"
                   value={formData.model}
                   onChange={(e) => handleChange('model', e.target.value)}
-                  placeholder="e.g., 2023 M2 Pro"
+                  placeholder="ex: 2023 M2 Pro"
                   required
                   data-testid="input-model"
                 />
@@ -106,13 +106,13 @@ export default function AddEquipment() {
 
               <div className="space-y-2">
                 <Label htmlFor="serial_number" className="text-sm font-medium text-slate-700">
-                  Serial Number
+                  Número de Série
                 </Label>
                 <Input
                   id="serial_number"
                   value={formData.serial_number}
                   onChange={(e) => handleChange('serial_number', e.target.value)}
-                  placeholder="e.g., SN123456789"
+                  placeholder="ex: SN123456789"
                   className="font-mono"
                   data-testid="input-serial"
                 />
@@ -120,16 +120,16 @@ export default function AddEquipment() {
 
               <div className="space-y-2">
                 <Label htmlFor="status" className="text-sm font-medium text-slate-700">
-                  Initial Status
+                  Status Inicial
                 </Label>
                 <Select value={formData.status} onValueChange={(value) => handleChange('status', value)}>
                   <SelectTrigger id="status" data-testid="select-status">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Available">Available</SelectItem>
-                    <SelectItem value="Maintenance">Maintenance</SelectItem>
-                    <SelectItem value="Retired">Retired</SelectItem>
+                    <SelectItem value="Available">Disponível</SelectItem>
+                    <SelectItem value="Maintenance">Manutenção</SelectItem>
+                    <SelectItem value="Retired">Desativado</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -142,7 +142,7 @@ export default function AddEquipment() {
                 className="bg-slate-900 hover:bg-slate-800 text-white"
                 data-testid="submit-btn"
               >
-                {loading ? 'Adding...' : 'Add Equipment'}
+                {loading ? 'Adicionando...' : 'Adicionar Equipamento'}
               </Button>
               <Button
                 type="button"
@@ -150,7 +150,7 @@ export default function AddEquipment() {
                 onClick={() => navigate('/equipment')}
                 data-testid="cancel-btn"
               >
-                Cancel
+                Cancelar
               </Button>
             </div>
           </form>
