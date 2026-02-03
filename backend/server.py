@@ -93,6 +93,15 @@ class Document(BaseModel):
     file_size: int
     uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class Settings(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default="system_settings")
+    check_interval_hours: int = 1  # Default: check every hour
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class SettingsUpdate(BaseModel):
+    check_interval_hours: int
+
 # ============= Equipment Endpoints =============
 
 @api_router.post("/equipment", response_model=Equipment)
@@ -273,6 +282,35 @@ async def get_overdue_equipment():
     
     return equipment_list
 
+@api_router.get("/overdue/detailed")
+async def get_overdue_detailed():
+    """Get detailed overdue information with days calculation"""
+    now = datetime.now(timezone.utc)
+    now_iso = now.isoformat()
+    
+    equipment_list = await db.equipment.find({
+        "status": "On Loan",
+        "expected_return_date": {"$lt": now_iso}
+    }, {"_id": 0}).to_list(1000)
+    
+    overdue_details = []
+    for equip in equipment_list:
+        expected_return = datetime.fromisoformat(equip['expected_return_date']) if isinstance(equip['expected_return_date'], str) else equip['expected_return_date']
+        days_overdue = (now - expected_return).days
+        
+        overdue_details.append({
+            "id": equip['id'],
+            "name": equip['name'],
+            "model": equip['model'],
+            "borrower_name": equip.get('current_borrower', 'N/A'),
+            "borrower_email": equip.get('current_borrower_email', 'N/A'),
+            "expected_return_date": expected_return.isoformat(),
+            "days_overdue": days_overdue,
+            "status": "Atrasado"
+        })
+    
+    return overdue_details
+
 # ============= Document Endpoints =============
 
 @api_router.post("/documents/upload")
@@ -384,6 +422,39 @@ async def get_stats():
         "maintenance": maintenance,
         "overdue": overdue
     }
+
+# ============= Settings Endpoints =============
+
+@api_router.get("/settings")
+async def get_settings():
+    settings = await db.settings.find_one({"id": "system_settings"}, {"_id": 0})
+    if not settings:
+        # Return default settings
+        default_settings = Settings()
+        return default_settings.model_dump()
+    
+    if settings.get('updated_at') and isinstance(settings['updated_at'], str):
+        settings['updated_at'] = datetime.fromisoformat(settings['updated_at'])
+    
+    return settings
+
+@api_router.put("/settings")
+async def update_settings(settings_update: SettingsUpdate):
+    settings = Settings(
+        check_interval_hours=settings_update.check_interval_hours,
+        updated_at=datetime.now(timezone.utc)
+    )
+    
+    doc = settings.model_dump()
+    doc['updated_at'] = doc['updated_at'].isoformat()
+    
+    await db.settings.update_one(
+        {"id": "system_settings"},
+        {"$set": doc},
+        upsert=True
+    )
+    
+    return {"message": "Settings updated successfully", "settings": settings.model_dump()}
 
 # Include the router in the main app
 app.include_router(api_router)
