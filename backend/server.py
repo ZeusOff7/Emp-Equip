@@ -296,6 +296,11 @@ async def get_overdue_detailed():
     overdue_details = []
     for equip in equipment_list:
         expected_return = datetime.fromisoformat(equip['expected_return_date']) if isinstance(equip['expected_return_date'], str) else equip['expected_return_date']
+        
+        # Ensure expected_return has timezone info
+        if expected_return.tzinfo is None:
+            expected_return = expected_return.replace(tzinfo=timezone.utc)
+        
         days_overdue = (now - expected_return).days
         
         overdue_details.append({
