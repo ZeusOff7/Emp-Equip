@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Search, Filter } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -25,10 +25,19 @@ const STATUS_MAP = {
 };
 
 export default function EquipmentList() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [equipment, setEquipment] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+
+  useEffect(() => {
+    // Read status from URL parameters
+    const urlStatus = searchParams.get('status');
+    if (urlStatus && urlStatus !== 'All') {
+      setStatusFilter(urlStatus);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetchEquipment();
@@ -69,6 +78,17 @@ export default function EquipmentList() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleStatusChange = (newStatus) => {
+    setStatusFilter(newStatus);
+    // Update URL parameters
+    if (newStatus === 'All') {
+      searchParams.delete('status');
+    } else {
+      searchParams.set('status', newStatus);
+    }
+    setSearchParams(searchParams);
   };
 
   const getStatusBadge = (status) => {
