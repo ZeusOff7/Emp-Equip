@@ -31,7 +31,7 @@ export default function Dashboard() {
       setRecentMovements(movementsRes.data.slice(0, 5));
       setOverdueEquipment(overdueRes.data);
     } catch (error) {
-      toast.error('Failed to load dashboard data');
+      toast.error('Falha ao carregar dados do painel');
       console.error(error);
     } finally {
       setLoading(false);
@@ -40,26 +40,26 @@ export default function Dashboard() {
 
   // Mock chart data
   const chartData = [
-    { name: 'Mon', loans: 4 },
-    { name: 'Tue', loans: 6 },
-    { name: 'Wed', loans: 8 },
-    { name: 'Thu', loans: 5 },
-    { name: 'Fri', loans: 9 },
-    { name: 'Sat', loans: 3 },
-    { name: 'Sun', loans: 2 },
+    { name: 'Seg', loans: 4 },
+    { name: 'Ter', loans: 6 },
+    { name: 'Qua', loans: 8 },
+    { name: 'Qui', loans: 5 },
+    { name: 'Sex', loans: 9 },
+    { name: 'Sáb', loans: 3 },
+    { name: 'Dom', loans: 2 },
   ];
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-slate-500">Loading dashboard...</div>
+        <div className="text-slate-500">Carregando painel...</div>
       </div>
     );
   }
 
   const statCards = [
     {
-      title: 'Total Equipment',
+      title: 'Total de Equipamentos',
       value: stats?.total_equipment || 0,
       icon: Package,
       color: 'text-slate-900',
@@ -67,7 +67,7 @@ export default function Dashboard() {
       testId: 'stat-total'
     },
     {
-      title: 'Available',
+      title: 'Disponíveis',
       value: stats?.available || 0,
       icon: CheckCircle,
       color: 'text-emerald-700',
@@ -75,7 +75,7 @@ export default function Dashboard() {
       testId: 'stat-available'
     },
     {
-      title: 'On Loan',
+      title: 'Em Empréstimo',
       value: stats?.on_loan || 0,
       icon: AlertTriangle,
       color: 'text-amber-700',
@@ -83,7 +83,7 @@ export default function Dashboard() {
       testId: 'stat-on-loan'
     },
     {
-      title: 'Maintenance',
+      title: 'Manutenção',
       value: stats?.maintenance || 0,
       icon: Wrench,
       color: 'text-slate-700',
@@ -95,8 +95,8 @@ export default function Dashboard() {
   return (
     <div className="p-8 md:p-12" data-testid="dashboard-page">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-slate-900 mb-2">Dashboard</h1>
-        <p className="text-slate-600">Equipment loan management overview</p>
+        <h1 className="text-4xl font-bold text-slate-900 mb-2">Painel de Controle</h1>
+        <p className="text-slate-600">Visão geral do gerenciamento de empréstimos</p>
       </div>
 
       {/* Stats Grid */}
@@ -129,7 +129,7 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="text-red-900 flex items-center gap-2">
               <AlertTriangle className="h-5 w-5" />
-              Overdue Equipment ({overdueEquipment.length})
+              Equipamentos Atrasados ({overdueEquipment.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -144,10 +144,10 @@ export default function Dashboard() {
                   <div className="flex justify-between items-center">
                     <div>
                       <p className="font-medium text-slate-900">{item.name}</p>
-                      <p className="text-sm text-slate-600">Borrower: {item.current_borrower}</p>
+                      <p className="text-sm text-slate-600">Responsável: {item.current_borrower}</p>
                     </div>
                     <p className="text-sm text-red-700 font-medium">
-                      Due: {new Date(item.expected_return_date).toLocaleDateString()}
+                      Prazo: {new Date(item.expected_return_date).toLocaleDateString('pt-BR')}
                     </p>
                   </div>
                 </Link>
@@ -162,7 +162,7 @@ export default function Dashboard() {
         {/* Chart */}
         <Card className="border border-slate-200 rounded-xl" data-testid="loans-chart">
           <CardHeader>
-            <CardTitle className="text-lg font-semibold">Loans This Week</CardTitle>
+            <CardTitle className="text-lg font-semibold">Empréstimos Esta Semana</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
@@ -193,12 +193,12 @@ export default function Dashboard() {
         {/* Recent Activity */}
         <Card className="border border-slate-200 rounded-xl" data-testid="recent-activity">
           <CardHeader>
-            <CardTitle className="text-lg font-semibold">Recent Activity</CardTitle>
+            <CardTitle className="text-lg font-semibold">Atividades Recentes</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {recentMovements.length === 0 ? (
-                <p className="text-slate-500 text-sm">No recent activity</p>
+                <p className="text-slate-500 text-sm">Nenhuma atividade recente</p>
               ) : (
                 recentMovements.map((movement) => (
                   <div
@@ -220,11 +220,11 @@ export default function Dashboard() {
                         {movement.equipment_name}
                       </p>
                       <p className="text-xs text-slate-600">
-                        {movement.movement_type === 'check_out' ? 'Checked out to' : 'Returned by'}{' '}
+                        {movement.movement_type === 'check_out' ? 'Emprestado para' : 'Devolvido por'}{' '}
                         {movement.borrower_name}
                       </p>
                       <p className="text-xs text-slate-500 mt-1">
-                        {new Date(movement.timestamp).toLocaleString()}
+                        {new Date(movement.timestamp).toLocaleString('pt-BR')}
                       </p>
                     </div>
                   </div>

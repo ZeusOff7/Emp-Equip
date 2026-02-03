@@ -6,10 +6,10 @@ export default function Layout({ children }) {
   const location = useLocation();
 
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-    { name: 'Equipment', href: '/equipment', icon: Package },
-    { name: 'Transactions', href: '/transactions', icon: History },
-    { name: 'Reports', href: '/reports', icon: FileText },
+    { name: 'Painel', href: '/', icon: LayoutDashboard },
+    { name: 'Equipamentos', href: '/equipment', icon: Package },
+    { name: 'Movimentações', href: '/transactions', icon: History },
+    { name: 'Relatórios', href: '/reports', icon: FileText },
   ];
 
   const isActive = (path) => {
@@ -23,7 +23,7 @@ export default function Layout({ children }) {
       <aside className="w-64 bg-slate-50 border-r border-slate-200 flex flex-col">
         <div className="p-6 border-b border-slate-200">
           <h1 className="text-2xl font-bold text-slate-900" data-testid="app-title">LoanTrek</h1>
-          <p className="text-sm text-slate-600 mt-1">Equipment Loan System</p>
+          <p className="text-sm text-slate-600 mt-1">Sistema de Empréstimo</p>
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
@@ -58,7 +58,7 @@ export default function Layout({ children }) {
               data-testid="add-equipment-btn"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add Equipment
+              Adicionar Equipamento
             </Button>
           </Link>
         </div>
