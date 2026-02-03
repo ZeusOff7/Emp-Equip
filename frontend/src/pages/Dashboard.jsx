@@ -117,21 +117,27 @@ export default function Dashboard() {
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title} className="stat-card border border-slate-200 rounded-xl" data-testid={stat.testId}>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600 uppercase tracking-wider">
-                      {stat.title}
-                    </p>
-                    <p className="text-3xl font-bold text-slate-900 mt-2">{stat.value}</p>
+            <Link
+              key={stat.title}
+              to={`/equipment?status=${stat.filterStatus}`}
+              data-testid={stat.testId}
+            >
+              <Card className="stat-card border border-slate-200 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 h-full">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-600 uppercase tracking-wider">
+                        {stat.title}
+                      </p>
+                      <p className="text-3xl font-bold text-slate-900 mt-2">{stat.value}</p>
+                    </div>
+                    <div className={`${stat.bgColor} ${stat.color} p-3 rounded-lg`}>
+                      <Icon className="h-6 w-6" strokeWidth={1.5} />
+                    </div>
                   </div>
-                  <div className={`${stat.bgColor} ${stat.color} p-3 rounded-lg`}>
-                    <Icon className="h-6 w-6" strokeWidth={1.5} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </Link>
           );
         })}
       </div>
