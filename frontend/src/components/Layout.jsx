@@ -17,6 +17,7 @@ export default function Layout({ children }) {
   const [overdueCount, setOverdueCount] = useState(0);
   const [overdueItems, setOverdueItems] = useState([]);
   const [checkInterval, setCheckInterval] = useState(3600000); // Default: 1 hour
+  const [readNotifications, setReadNotifications] = useState([]);
 
   const navigation = [
     { name: 'Painel', href: '/', icon: LayoutDashboard },
@@ -34,8 +35,16 @@ export default function Layout({ children }) {
   const fetchOverdue = async () => {
     try {
       const response = await axios.get(`${API}/overdue/detailed`);
-      setOverdueCount(response.data.length);
       setOverdueItems(response.data.slice(0, 5)); // Show only first 5 in notification
+      
+      // Load read notifications from localStorage
+      const stored = localStorage.getItem('readNotifications');
+      const readIds = stored ? JSON.parse(stored) : [];
+      setReadNotifications(readIds);
+      
+      // Count only unread notifications
+      const unreadCount = response.data.filter(item => !readIds.includes(item.id)).length;
+      setOverdueCount(unreadCount);
     } catch (error) {
       console.error('Erro ao buscar atrasos:', error);
     }
@@ -49,6 +58,29 @@ export default function Layout({ children }) {
     } catch (error) {
       console.error('Erro ao buscar configurações:', error);
     }
+  };
+
+  const markAsRead = (itemId) => {
+    const newReadList = [...readNotifications, itemId];
+    setReadNotifications(newReadList);
+    localStorage.setItem('readNotifications', JSON.stringify(newReadList));
+    
+    // Update count
+    const unreadCount = overdueItems.filter(item => !newReadList.includes(item.id)).length;
+    setOverdueCount(unreadCount);
+  };
+
+  const markAllAsRead = () => {
+    const allIds = overdueItems.map(item => item.id);
+    setReadNotifications(allIds);
+    localStorage.setItem('readNotifications', JSON.stringify(allIds));
+    setOverdueCount(0);
+  };
+
+  const clearReadNotifications = () => {
+    setReadNotifications([]);
+    localStorage.removeItem('readNotifications');
+    fetchOverdue();
   };
 
   useEffect(() => {
