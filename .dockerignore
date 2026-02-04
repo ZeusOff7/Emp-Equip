@@ -1,0 +1,40 @@
+# Backend
+backend/__pycache__
+backend/*.pyc
+backend/.pytest_cache
+backend/venv
+backend/env
+backend/.env
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Frontend
+frontend/node_modules
+frontend/build
+frontend/.cache
+frontend/.env
+frontend/coverage
+
+# Git
+.git
+.gitignore
+
+# Docker
+.dockerignore
+docker-compose*.yml
+Dockerfile*
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs
+
+# OS
+.DS_Store
+Thumbs.db
