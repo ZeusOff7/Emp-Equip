@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Package, History, FileText, Plus, Bell, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
   Popover,
@@ -12,11 +12,11 @@ import {
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-function Layout({ children }) {
+export default function Layout({ children }) {
   const location = useLocation();
   const [overdueCount, setOverdueCount] = useState(0);
   const [overdueItems, setOverdueItems] = useState([]);
-  const [checkInterval, setCheckInterval] = useState(3600000);
+  const [checkInterval, setCheckInterval] = useState(3600000); // Default: 1 hour
   const [readNotifications, setReadNotifications] = useState([]);
 
   const navigation = [
@@ -35,12 +35,14 @@ function Layout({ children }) {
   const fetchOverdue = async () => {
     try {
       const response = await axios.get(`${API}/overdue/detailed`);
-      setOverdueItems(response.data.slice(0, 5));
+      setOverdueItems(response.data.slice(0, 5)); // Show only first 5 in notification
       
+      // Load read notifications from localStorage
       const stored = localStorage.getItem('readNotifications');
       const readIds = stored ? JSON.parse(stored) : [];
       setReadNotifications(readIds);
       
+      // Count only unread notifications
       const unreadCount = response.data.filter(item => !readIds.includes(item.id)).length;
       setOverdueCount(unreadCount);
     } catch (error) {
@@ -52,7 +54,7 @@ function Layout({ children }) {
     try {
       const response = await axios.get(`${API}/settings`);
       const intervalHours = response.data.check_interval_hours || 1;
-      setCheckInterval(intervalHours * 3600000);
+      setCheckInterval(intervalHours * 3600000); // Convert hours to milliseconds
     } catch (error) {
       console.error('Erro ao buscar configurações:', error);
     }
@@ -63,6 +65,7 @@ function Layout({ children }) {
     setReadNotifications(newReadList);
     localStorage.setItem('readNotifications', JSON.stringify(newReadList));
     
+    // Update count
     const unreadCount = overdueItems.filter(item => !newReadList.includes(item.id)).length;
     setOverdueCount(unreadCount);
   };
@@ -95,6 +98,7 @@ function Layout({ children }) {
 
   return (
     <div className="flex h-screen bg-white" data-testid="main-layout">
+      {/* Sidebar */}
       <aside className="w-64 bg-slate-50 border-r border-slate-200 flex flex-col">
         <div className="p-6 border-b border-slate-200">
           <h1 className="text-2xl font-bold text-slate-900" data-testid="app-title">CANSF</h1>
@@ -104,14 +108,20 @@ function Layout({ children }) {
         <nav className="flex-1 p-4 space-y-1">
           {navigation.map((item) => {
             const Icon = item.icon;
-            const activeClass = isActive(item.href) ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100';
-            
             return (
               <Link
                 key={item.name}
                 to={item.href}
                 data-testid={`nav-${item.name.toLowerCase()}`}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors duration-200 ${activeClass}`}
+                className={`
+                  flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium
+                  transition-colors duration-200
+                  ${
+                    isActive(item.href)
+                      ? 'bg-slate-900 text-white'
+                      : 'text-slate-700 hover:bg-slate-100'
+                  }
+                `}
               >
                 <Icon className="h-5 w-5" strokeWidth={1.5} />
                 {item.name}
@@ -133,7 +143,9 @@ function Layout({ children }) {
         </div>
       </aside>
 
+      {/* Main Content */}
       <div className="flex-1 flex flex-col">
+        {/* Top Bar with Notifications */}
         <div className="h-16 border-b border-slate-200 bg-white flex items-center justify-end px-8">
           <Popover>
             <PopoverTrigger asChild>
@@ -168,18 +180,23 @@ function Layout({ children }) {
                     <p className="text-slate-500 text-sm">Nenhum atraso no momento</p>
                   </div>
                 ) : (
-                  <React.Fragment>
+                  <>
                     <div className="space-y-2 max-h-96 overflow-y-auto">
                       {overdueItems.map((item) => {
                         const isRead = readNotifications.includes(item.id);
-                        const bgClass = isRead ? 'bg-slate-50 border-slate-200 opacity-60' : 'bg-red-50 border-red-200 hover:bg-red-100';
-                        
                         return (
                           <div
                             key={item.id}
-                            className={`p-3 border rounded-lg transition-colors relative ${bgClass}`}
+                            className={`p-3 border rounded-lg transition-colors relative ${
+                              isRead 
+                                ? 'bg-slate-50 border-slate-200 opacity-60' 
+                                : 'bg-red-50 border-red-200 hover:bg-red-100'
+                            }`}
                           >
-                            <Link to={`/equipment/${item.id}`} className="block">
+                            <Link
+                              to={`/equipment/${item.id}`}
+                              className="block"
+                            >
                               <div className="flex justify-between items-start pr-6">
                                 <div>
                                   <p className="font-medium text-slate-900 text-sm">{item.name}</p>
@@ -239,13 +256,14 @@ function Layout({ children }) {
                         </button>
                       )}
                     </div>
-                  </React.Fragment>
+                  </>
                 )}
               </div>
             </PopoverContent>
           </Popover>
         </div>
 
+        {/* Page Content */}
         <main className="flex-1 overflow-auto">
           {children}
         </main>
@@ -253,5 +271,3 @@ function Layout({ children }) {
     </div>
   );
 }
-
-export default Layout;
