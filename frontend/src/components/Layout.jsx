@@ -16,7 +16,7 @@ export default function Layout({ children }) {
   const location = useLocation();
   const [overdueCount, setOverdueCount] = useState(0);
   const [overdueItems, setOverdueItems] = useState([]);
-  const [checkInterval, setCheckInterval] = useState(3600000); // Default: 1 hour
+  const [checkInterval, setCheckInterval] = useState(3600000);
   const [readNotifications, setReadNotifications] = useState([]);
 
   const navigation = [
@@ -35,14 +35,12 @@ export default function Layout({ children }) {
   const fetchOverdue = async () => {
     try {
       const response = await axios.get(`${API}/overdue/detailed`);
-      setOverdueItems(response.data.slice(0, 5)); // Show only first 5 in notification
+      setOverdueItems(response.data.slice(0, 5));
       
-      // Load read notifications from localStorage
       const stored = localStorage.getItem('readNotifications');
       const readIds = stored ? JSON.parse(stored) : [];
       setReadNotifications(readIds);
       
-      // Count only unread notifications
       const unreadCount = response.data.filter(item => !readIds.includes(item.id)).length;
       setOverdueCount(unreadCount);
     } catch (error) {
@@ -54,7 +52,7 @@ export default function Layout({ children }) {
     try {
       const response = await axios.get(`${API}/settings`);
       const intervalHours = response.data.check_interval_hours || 1;
-      setCheckInterval(intervalHours * 3600000); // Convert hours to milliseconds
+      setCheckInterval(intervalHours * 3600000);
     } catch (error) {
       console.error('Erro ao buscar configurações:', error);
     }
@@ -65,7 +63,6 @@ export default function Layout({ children }) {
     setReadNotifications(newReadList);
     localStorage.setItem('readNotifications', JSON.stringify(newReadList));
     
-    // Update count
     const unreadCount = overdueItems.filter(item => !newReadList.includes(item.id)).length;
     setOverdueCount(unreadCount);
   };
@@ -98,7 +95,6 @@ export default function Layout({ children }) {
 
   return (
     <div className="flex h-screen bg-white" data-testid="main-layout">
-      {/* Sidebar */}
       <aside className="w-64 bg-slate-50 border-r border-slate-200 flex flex-col">
         <div className="p-6 border-b border-slate-200">
           <h1 className="text-2xl font-bold text-slate-900" data-testid="app-title">CANSF</h1>
@@ -143,9 +139,7 @@ export default function Layout({ children }) {
         </div>
       </aside>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Top Bar with Notifications */}
         <div className="h-16 border-b border-slate-200 bg-white flex items-center justify-end px-8">
           <Popover>
             <PopoverTrigger asChild>
@@ -263,7 +257,6 @@ export default function Layout({ children }) {
           </Popover>
         </div>
 
-        {/* Page Content */}
         <main className="flex-1 overflow-auto">
           {children}
         </main>
