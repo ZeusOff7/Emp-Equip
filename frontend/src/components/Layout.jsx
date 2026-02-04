@@ -1,7 +1,7 @@
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Package, History, FileText, Plus, Bell, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
   Popover,
@@ -12,7 +12,7 @@ import {
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-export default function Layout({ children }) {
+function Layout({ children }) {
   const location = useLocation();
   const [overdueCount, setOverdueCount] = useState(0);
   const [overdueItems, setOverdueItems] = useState([]);
@@ -104,20 +104,14 @@ export default function Layout({ children }) {
         <nav className="flex-1 p-4 space-y-1">
           {navigation.map((item) => {
             const Icon = item.icon;
+            const activeClass = isActive(item.href) ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100';
+            
             return (
               <Link
                 key={item.name}
                 to={item.href}
                 data-testid={`nav-${item.name.toLowerCase()}`}
-                className={`
-                  flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium
-                  transition-colors duration-200
-                  ${
-                    isActive(item.href)
-                      ? 'bg-slate-900 text-white'
-                      : 'text-slate-700 hover:bg-slate-100'
-                  }
-                `}
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors duration-200 ${activeClass}`}
               >
                 <Icon className="h-5 w-5" strokeWidth={1.5} />
                 {item.name}
@@ -174,23 +168,18 @@ export default function Layout({ children }) {
                     <p className="text-slate-500 text-sm">Nenhum atraso no momento</p>
                   </div>
                 ) : (
-                  <>
+                  <React.Fragment>
                     <div className="space-y-2 max-h-96 overflow-y-auto">
                       {overdueItems.map((item) => {
                         const isRead = readNotifications.includes(item.id);
+                        const bgClass = isRead ? 'bg-slate-50 border-slate-200 opacity-60' : 'bg-red-50 border-red-200 hover:bg-red-100';
+                        
                         return (
                           <div
                             key={item.id}
-                            className={`p-3 border rounded-lg transition-colors relative ${
-                              isRead 
-                                ? 'bg-slate-50 border-slate-200 opacity-60' 
-                                : 'bg-red-50 border-red-200 hover:bg-red-100'
-                            }`}
+                            className={`p-3 border rounded-lg transition-colors relative ${bgClass}`}
                           >
-                            <Link
-                              to={`/equipment/${item.id}`}
-                              className="block"
-                            >
+                            <Link to={`/equipment/${item.id}`} className="block">
                               <div className="flex justify-between items-start pr-6">
                                 <div>
                                   <p className="font-medium text-slate-900 text-sm">{item.name}</p>
@@ -250,7 +239,7 @@ export default function Layout({ children }) {
                         </button>
                       )}
                     </div>
-                  </>
+                  </React.Fragment>
                 )}
               </div>
             </PopoverContent>
@@ -264,3 +253,5 @@ export default function Layout({ children }) {
     </div>
   );
 }
+
+export default Layout;
