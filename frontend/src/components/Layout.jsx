@@ -17,7 +17,6 @@ export default function Layout({ children }) {
   const [overdueCount, setOverdueCount] = useState(0);
   const [overdueItems, setOverdueItems] = useState([]);
   const [checkInterval, setCheckInterval] = useState(3600000); // Default: 1 hour
-  const [readNotifications, setReadNotifications] = useState([]);
 
   const navigation = [
     { name: 'Painel', href: '/', icon: LayoutDashboard },
@@ -35,16 +34,8 @@ export default function Layout({ children }) {
   const fetchOverdue = async () => {
     try {
       const response = await axios.get(`${API}/overdue/detailed`);
+      setOverdueCount(response.data.length);
       setOverdueItems(response.data.slice(0, 5)); // Show only first 5 in notification
-      
-      // Load read notifications from localStorage
-      const stored = localStorage.getItem('readNotifications');
-      const readIds = stored ? JSON.parse(stored) : [];
-      setReadNotifications(readIds);
-      
-      // Count only unread notifications
-      const unreadCount = response.data.filter(item => !readIds.includes(item.id)).length;
-      setOverdueCount(unreadCount);
     } catch (error) {
       console.error('Erro ao buscar atrasos:', error);
     }
@@ -58,29 +49,6 @@ export default function Layout({ children }) {
     } catch (error) {
       console.error('Erro ao buscar configurações:', error);
     }
-  };
-
-  const markAsRead = (itemId) => {
-    const newReadList = [...readNotifications, itemId];
-    setReadNotifications(newReadList);
-    localStorage.setItem('readNotifications', JSON.stringify(newReadList));
-    
-    // Update count
-    const unreadCount = overdueItems.filter(item => !newReadList.includes(item.id)).length;
-    setOverdueCount(unreadCount);
-  };
-
-  const markAllAsRead = () => {
-    const allIds = overdueItems.map(item => item.id);
-    setReadNotifications(allIds);
-    localStorage.setItem('readNotifications', JSON.stringify(allIds));
-    setOverdueCount(0);
-  };
-
-  const clearReadNotifications = () => {
-    setReadNotifications([]);
-    localStorage.removeItem('readNotifications');
-    fetchOverdue();
   };
 
   useEffect(() => {
@@ -101,8 +69,8 @@ export default function Layout({ children }) {
       {/* Sidebar */}
       <aside className="w-64 bg-slate-50 border-r border-slate-200 flex flex-col">
         <div className="p-6 border-b border-slate-200">
-          <h1 className="text-2xl font-bold text-slate-900" data-testid="app-title">CANSF</h1>
-          <p className="text-sm text-slate-600 mt-1">Gestão de Empréstimos</p>
+          <h1 className="text-2xl font-bold text-slate-900" data-testid="app-title">LoanTrek</h1>
+          <p className="text-sm text-slate-600 mt-1">Sistema de Empréstimo</p>
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
@@ -180,52 +148,24 @@ export default function Layout({ children }) {
                     <p className="text-slate-500 text-sm">Nenhum atraso no momento</p>
                   </div>
                 ) : (
-                  <>
-                    <div className="space-y-2 max-h-96 overflow-y-auto">
-                      {overdueItems.map((item) => {
-                        const isRead = readNotifications.includes(item.id);
-                        return (
-                          <div
-                            key={item.id}
-                            className={`p-3 border rounded-lg transition-colors relative ${
-                              isRead 
-                                ? 'bg-slate-50 border-slate-200 opacity-60' 
-                                : 'bg-red-50 border-red-200 hover:bg-red-100'
-                            }`}
-                          >
-                            <Link
-                              to={`/equipment/${item.id}`}
-                              className="block"
-                            >
-                              <div className="flex justify-between items-start pr-6">
-                                <div>
-                                  <p className="font-medium text-slate-900 text-sm">{item.name}</p>
-                                  <p className="text-xs text-slate-600">{item.borrower_name}</p>
-                                </div>
-                                <span className="text-xs font-bold text-red-700">
-                                  {item.days_overdue} {item.days_overdue === 1 ? 'dia' : 'dias'}
-                                </span>
-                              </div>
-                            </Link>
-                            {!isRead && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  markAsRead(item.id);
-                                }}
-                                className="absolute top-2 right-2 p-1 hover:bg-red-200 rounded-full transition-colors"
-                                title="Marcar como lida"
-                                data-testid={`mark-read-${item.id}`}
-                              >
-                                <svg className="h-3 w-3 text-red-700" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                                </svg>
-                              </button>
-                            )}
+                  <div className="space-y-2">
+                    {overdueItems.map((item) => (
+                      <Link
+                        key={item.id}
+                        to={`/equipment/${item.id}`}
+                        className="block p-3 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium text-slate-900 text-sm">{item.name}</p>
+                            <p className="text-xs text-slate-600">{item.borrower_name}</p>
                           </div>
-                        );
-                      })}
-                    </div>
+                          <span className="text-xs font-bold text-red-700">
+                            {item.days_overdue} {item.days_overdue === 1 ? 'dia' : 'dias'}
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
 
                     {overdueCount > 5 && (
                       <Link
@@ -235,28 +175,7 @@ export default function Layout({ children }) {
                         Ver todos os {overdueCount} atrasos
                       </Link>
                     )}
-
-                    <div className="pt-3 border-t border-slate-200 flex gap-2">
-                      {overdueCount > 0 && (
-                        <button
-                          onClick={markAllAsRead}
-                          className="flex-1 px-3 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
-                          data-testid="mark-all-read-btn"
-                        >
-                          Marcar Todas como Lidas
-                        </button>
-                      )}
-                      {readNotifications.length > 0 && (
-                        <button
-                          onClick={clearReadNotifications}
-                          className="flex-1 px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-                          data-testid="clear-read-btn"
-                        >
-                          Limpar Lidas
-                        </button>
-                      )}
-                    </div>
-                  </>
+                  </div>
                 )}
               </div>
             </PopoverContent>
